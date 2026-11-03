@@ -18,7 +18,7 @@ Una aplicación que permita subir un lote de imágenes aéreas y visualizar las 
 
 ## Estado del proyecto
 
-**Alcance y arquitectura documentados.** El stack inicial está definido para construir el MVP, pero aún no se instaló el entorno ni se implementó el detector, la API o la interfaz. El dataset sigue pendiente de selección y validación.
+**Arquitectura documentada y entorno de desarrollo configurado en archivos.** La instalación local de Python y las herramientas debe verificarse en cada equipo. Todavía no existen detector, API, interfaz ni dataset validado.
 
 ## Requisitos académicos
 
@@ -31,6 +31,26 @@ Una aplicación que permita subir un lote de imágenes aéreas y visualizar las 
 - Informe IEEE de **exactamente 3 páginas** y demo en vivo en la defensa.
 
 Los requisitos y criterios están detallados en [`docs/01_ALCANCE.md`](docs/01_ALCANCE.md).
+
+
+## Entorno de desarrollo (Windows / PowerShell)
+
+**Requisito:** Python 3.11 instalado (comprobar con `py -3.11 --version`). El entorno virtual y sus paquetes no se suben a Git.
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+
+.\.venv\Scripts\python.exe scripts/check_environment.py
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe -m ruff check scripts tests
+.\.venv\Scripts\python.exe -m ruff format --check scripts tests
+```
+
+Si el comando `py -3.11` falla, instalar primero Python 3.11; no reemplazarlo silenciosamente por otra versión. Los comandos usan el intérprete de `.venv` directamente y no requieren activar el entorno ni cambiar políticas de PowerShell.
+
+`requirements-dev.txt` fija por ahora **solo** `pytest` y `ruff`; las dependencias del entrenamiento, API y UI se incorporarán cuando exista código que las necesite. `pyproject.toml` configura las herramientas, **no** declara aún un paquete Python instalable. La verificación prueba la configuración de desarrollo, no el desempeño del futuro modelo.
 
 ## Organización
 

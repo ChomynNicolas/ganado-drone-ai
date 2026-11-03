@@ -30,7 +30,7 @@ Este documento separa decisiones **adoptadas** de hipótesis **pendientes de ver
 | Split final | Pendiente | evitar imágenes del mismo vuelo/escena en grupos distintos, cuando haya metadata |
 | Tamaño de imagen y batch | Pendiente | medir memoria y recall con GTX 1650 (4 GB); alternativa Colab |
 | Tiling / slicing | Condicional | agregar solo si las pruebas muestran pérdida de animales pequeños |
-| Versiones exactas de paquetes | Pendiente | fijarlas al crear el entorno y registrar `pip freeze` |
+| Versiones exactas de dependencias ML/API/UI | Pendiente | fijarlas cuando se implementen dichos componentes y registrar el entorno efectivo |
 | Licencias | Pendiente | comprobar permiso del dataset y condiciones de Ultralytics antes de publicar artefactos |
 | Umbral de confianza | Pendiente | seleccionar con validación, nunca con test |
 | Hardware de la demo | Pendiente | medir latencia en CPU y confirmar ejecución offline |
@@ -52,3 +52,9 @@ Este documento separa decisiones **adoptadas** de hipótesis **pendientes de ver
 - Instalación PyTorch: <https://pytorch.org/get-started/locally/>
 - Candidato WAID: <https://github.com/xiaohuicui/WAID>
 - Licencias Ultralytics: <https://docs.ultralytics.com/>
+
+## Entorno de desarrollo inicial
+
+La configuración inicial (Cambio 03) fija Python **3.11**, `pytest==9.2.0` y `ruff==0.17.3`. Se eligieron versiones concretas para reducir diferencias entre los equipos. El intérprete está indicado en `.python-version`, las herramientas en `requirements-dev.txt` y su comportamiento en `pyproject.toml`.
+
+La versión exacta de las dependencias transitivas y las bibliotecas ML/API/UI no se fija todavía: no han sido instaladas ni verificadas para el proyecto. Al agregar esas dependencias se registrará la instalación efectiva para reproducir los experimentos.

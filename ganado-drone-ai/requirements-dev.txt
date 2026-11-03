@@ -1,0 +1,3 @@
+# Herramientas de desarrollo; API, UI y ML se agregaran en sus etapas.
+pytest==9.2.0
+ruff==0.17.3
