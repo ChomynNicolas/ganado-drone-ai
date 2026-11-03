@@ -42,7 +42,7 @@ Los requisitos y criterios están detallados en [`docs/01_ALCANCE.md`](docs/01_A
 
 ## Trabajo y contribuciones
 
-Las nuevas funcionalidades se incorporan mediante **Issue → rama → commits → Pull Request → revisión → merge**. No se crean commits ficticios para aparentar evolución. Ver [`CONTRIBUTING.md`](CONTRIBUTING.md).
+En la etapa inicial, **Nicolás registra cambios pequeños y comprobables directamente en `main`**: Issue (cuando corresponda) → implementación → validación → commit → push. No se exigen Pull Requests ni revisiones por ahora. Sebastián será colaborador y registrará contribuciones propias cuando las realice. No se crean commits ficticios para aparentar evolución. Ver [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Fuentes de la consigna
 

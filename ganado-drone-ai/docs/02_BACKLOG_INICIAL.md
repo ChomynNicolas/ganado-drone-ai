@@ -21,8 +21,8 @@
 
 - **Título:** `[IA-03] Seleccionar y documentar dataset de ganado aéreo`.
 - **Descripción:** contexto, trabajo, criterios de aceptación, archivos esperados.
-- **Asignación:** una persona responsable, otra revisora.
+- **Asignación:** responsable de ejecución. La revisión por otra persona es opcional en esta etapa.
 - **Labels:** `data`, `model`, `api`, `ui`, `docs`, `bug`, `chore` (crear según necesidad).
-- **Estado:** `Open` → PR asociado → `Closed` cuando la evidencia cumple los criterios.
+- **Estado:** `Open` → commits enlazados y evidencia → `Closed` cuando cumple los criterios. El PR no es obligatorio en esta etapa.
 
 Un Issue de investigación puede cerrarse con documentos y hallazgos. Un Issue de implementación requiere código o artefactos probados.
