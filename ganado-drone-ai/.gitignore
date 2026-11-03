@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Datasets: document provenance and extraction scripts, not raw images
+/data/raw/
+/data/interim/
+/data/processed/
+/data/external/
+/datasets/
+
+# Trained weights and checkpoints
+/models/*.pt
+/models/*.pth
+/models/*.onnx
+/models/*.engine
+/checkpoints/
+/runs/
+/outputs/
+/artifacts/
+
+# ML tools / notebooks
+wandb/
+mlruns/
+.ipynb_checkpoints/
+
+# Generated reports (source documents may be versioned separately)
+/reports/generated/
+
+# Secrets
+*.pem
+*.key
