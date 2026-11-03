@@ -10,8 +10,10 @@ import argparse
 import hashlib
 import json
 import math
+import re
 import shutil
 import tempfile
+from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -27,21 +29,144 @@ class ImageRecord:
     cattle_lines: tuple[str, ...]
 
     @property
+    def source_id(self) -> str:
+        """ID anterior a la marca de exportación .rf.<hash>."""
+        return self.image.stem.split(".rf.", 1)[0]
+
+    @property
     def has_cattle(self) -> bool:
         return bool(self.cattle_lines)
 
 
-def _read_cattle_lines(label_path: Path) -> tuple[str, ...]:
+def _is_sheep_zero_box(raw: str) -> bool:
+    """Admite únicamente cajas sheep con ancho/alto exactamente cero.
+
+    Las demás coordenadas deben ser numéricas, finitas y estar normalizadas.
+    """
+    fields = raw.split()
+    if len(fields) != 5 or fields[0] != "0":
+        return False
+    try:
+        x, y, width, height = (float(value) for value in fields[1:])
+    except ValueError:
+        return False
+    if not all(math.isfinite(value) for value in (x, y, width, height)):
+        return False
+    if not (0 <= x <= 1 and 0 <= y <= 1):
+        return False
+    if not (0 <= width <= 1 and 0 <= height <= 1):
+        return False
+    if width != 0 and height != 0:
+        return False
+    return (
+        x - width / 2 >= -1e-6
+        and x + width / 2 <= 1 + 1e-6
+        and y - height / 2 >= -1e-6
+        and y + height / 2 <= 1 + 1e-6
+    )
+
+
+def _allowed_source_error(error: str) -> bool:
+    """Clasifica estrictamente el error del auditor que podemos descartar."""
+    match = re.fullmatch(
+        r"(?P<path>.+\.txt):(?P<line>\d+): "
+        r"width y height deben estar en \(0, 1]",
+        error,
+    )
+    if match is None:
+        return False
+    path = Path(match.group("path"))
+    try:
+        raw = path.read_text(encoding="utf-8").splitlines()[int(match.group("line")) - 1]
+    except (OSError, UnicodeError, IndexError):
+        return False
+    return _is_sheep_zero_box(raw)
+
+
+def _read_cattle_lines(
+    label_path: Path, *, allow_invalid_sheep_zero_boxes: bool = False
+) -> tuple[str, ...]:
     lines: list[str] = []
-    for raw in label_path.read_text(encoding="utf-8").splitlines():
+    for number, raw in enumerate(label_path.read_text(encoding="utf-8").splitlines(), 1):
         if not raw.strip():
             continue
-        class_id, *_ = validate_yolo_line(raw, num_classes=len(WAID_CLASSES))
+        if allow_invalid_sheep_zero_boxes and _is_sheep_zero_box(raw):
+            continue
+        try:
+            class_id, *_ = validate_yolo_line(raw, num_classes=len(WAID_CLASSES))
+        except ValueError as exc:
+            raise ValueError(f"{label_path}:{number}: {exc}") from exc
         if class_id == CATTLE_ID:
             # Mantener las coordenadas originales sin redondear nuevamente.
             coordinates = raw.split()[1:]
             lines.append("0 " + " ".join(coordinates))
     return tuple(lines)
+
+
+def _source_group_overlaps(records_by_split: dict[str, list[ImageRecord]]) -> dict[str, list[str]]:
+    appearances: dict[str, set[str]] = defaultdict(set)
+    for split, records in records_by_split.items():
+        for record in records:
+            appearances[record.source_id].add(split)
+    return {
+        source_id: sorted(splits) for source_id, splits in appearances.items() if len(splits) > 1
+    }
+
+
+def _group_resplit(
+    records_by_split: dict[str, list[ImageRecord]], seed: int
+) -> tuple[dict[str, list[ImageRecord]], dict[str, int]]:
+    """Resplit determinista estratificado por presencia de cattle, agrupado por foto.
+
+    La estratificación se hace por GRUPO, no por imagen; los tamaños de los
+    splits pueden apartarse de 70/20/10 según el tamaño de los grupos.
+    """
+    groups: dict[str, list[ImageRecord]] = defaultdict(list)
+    filenames: set[str] = set()
+    for split in SPLITS:
+        for record in records_by_split[split]:
+            if record.image.name in filenames:
+                raise ValueError(f"Nombre de imagen repetido entre splits: {record.image.name}")
+            filenames.add(record.image.name)
+            groups[record.source_id].append(record)
+
+    cohorts: dict[bool, list[str]] = {True: [], False: []}
+    for source_id, records in groups.items():
+        cohorts[any(record.has_cattle for record in records)].append(source_id)
+
+    assignments: dict[str, str] = {}
+    group_counts: dict[str, int] = {split: 0 for split in SPLITS}
+    for has_cattle, source_ids in cohorts.items():
+        if len(source_ids) < 3:
+            raise ValueError(
+                f"No hay grupos suficientes para repartir positivos={has_cattle}: "
+                f"{len(source_ids)}; se requieren al menos 3"
+            )
+        ranked = sorted(
+            source_ids,
+            key=lambda name: (
+                hashlib.sha256(f"{seed}:{has_cattle}:{name}".encode()).digest(),
+                name,
+            ),
+        )
+        count = len(ranked)
+        n_valid = max(1, round(count * 0.20))
+        n_test = max(1, round(count * 0.10))
+        n_train = count - n_valid - n_test
+        if n_train < 1:
+            n_train, n_valid, n_test = 1, 1, count - 2
+        for split, ids in zip(
+            SPLITS,
+            (ranked[:n_train], ranked[n_train : n_train + n_valid], ranked[-n_test:]),
+        ):
+            for source_id in ids:
+                assignments[source_id] = split
+                group_counts[split] += 1
+
+    selected: dict[str, list[ImageRecord]] = {split: [] for split in SPLITS}
+    for source_id, records in groups.items():
+        selected[assignments[source_id]].extend(records)
+    return selected, group_counts
 
 
 def _stable_sample(
@@ -58,7 +183,9 @@ def _stable_sample(
     return ranked[:limit]
 
 
-def _records(source: Path, split: str) -> tuple[list[ImageRecord], int]:
+def _records(
+    source: Path, split: str, *, allow_invalid_sheep_zero_boxes: bool = False
+) -> tuple[list[ImageRecord], int]:
     image_dir = source / "images" / split
     labels_dir = source / "labels" / split
     records: list[ImageRecord] = []
@@ -70,7 +197,14 @@ def _records(source: Path, split: str) -> tuple[list[ImageRecord], int]:
         if not label.is_file():
             skipped += 1
             continue  # Nunca interpretar silenciosamente una etiqueta ausente como negativa.
-        records.append(ImageRecord(image=image, cattle_lines=_read_cattle_lines(label)))
+        records.append(
+            ImageRecord(
+                image=image,
+                cattle_lines=_read_cattle_lines(
+                    label, allow_invalid_sheep_zero_boxes=allow_invalid_sheep_zero_boxes
+                ),
+            )
+        )
     return records, skipped
 
 
@@ -92,6 +226,8 @@ def prepare_dataset(
     max_train_positives: int | None = None,
     skip_missing_labels: bool = False,
     source_revision: str | None = None,
+    allow_invalid_sheep_zero_boxes: bool = False,
+    resplit_by_source_image: bool = False,
 ) -> dict:
     """Prepara un dataset auditable. Aborta ante errores críticos de WAID."""
     source = source.resolve()
@@ -104,9 +240,17 @@ def prepare_dataset(
         raise ValueError("--max-train-positives debe ser mayor que cero")
 
     audit = audit_dataset(source, hash_check=True)
-    if not audit.ok:
-        preview = " | ".join(audit.errors[:3])
-        raise ValueError(f"WAID no pasó auditoría: {preview} ({len(audit.errors)} errores)")
+    accepted_errors = (
+        [issue for issue in audit.errors if _allowed_source_error(issue)]
+        if allow_invalid_sheep_zero_boxes
+        else []
+    )
+    rejected_errors = [issue for issue in audit.errors if issue not in accepted_errors]
+    if rejected_errors:
+        preview = " | ".join(rejected_errors[:3])
+        raise ValueError(
+            f"WAID no pasó auditoría: {preview} ({len(rejected_errors)} errores no admitidos)"
+        )
     total_missing = sum(info.missing_labels for info in audit.splits.values())
     if total_missing and not skip_missing_labels:
         raise ValueError(
@@ -114,10 +258,34 @@ def prepare_dataset(
             "--skip-missing-labels para excluirlas expresamente."
         )
 
+    records_by_source_split: dict[str, list[ImageRecord]] = {}
+    skipped_by_split: dict[str, int] = {}
+    for split in SPLITS:
+        records, skipped = _records(
+            source, split, allow_invalid_sheep_zero_boxes=allow_invalid_sheep_zero_boxes
+        )
+        records_by_source_split[split] = records
+        skipped_by_split[split] = skipped
+
+    overlaps = _source_group_overlaps(records_by_source_split)
+    if overlaps and not resplit_by_source_image:
+        raise ValueError(
+            f"Hay {len(overlaps)} identificadores de fotografía original en varios "
+            "splits; utilizar --resplit-by-source-image para evitar ese leakage"
+        )
+    if resplit_by_source_image:
+        assigned, group_counts = _group_resplit(records_by_source_split, seed)
+    else:
+        assigned = records_by_source_split
+        group_counts = {
+            split: len({record.source_id for record in records})
+            for split, records in assigned.items()
+        }
+
     selected: dict[str, list[ImageRecord]] = {}
     summaries: dict[str, dict[str, int]] = {}
     for split in SPLITS:
-        records, skipped = _records(source, split)
+        records = assigned[split]
         positives = [record for record in records if record.has_cattle]
         negatives = [record for record in records if not record.has_cattle]
         if not positives:
@@ -128,7 +296,6 @@ def prepare_dataset(
                 positives = _stable_sample(positives, max_train_positives, seed, split)
             neg_limit = math.floor(len(positives) * train_negative_ratio)
             negatives = _stable_sample(negatives, neg_limit, seed, split)
-        # valid y test retienen todos los ejemplos etiquetados, incluidas otras especies.
         chosen = sorted([*positives, *negatives], key=lambda record: record.image.name)
         selected[split] = chosen
         summaries[split] = {
@@ -136,7 +303,8 @@ def prepare_dataset(
             "positive_images": len(positives),
             "negative_images": len(negatives),
             "cattle_boxes": sum(len(record.cattle_lines) for record in chosen),
-            "skipped_missing_labels": skipped,
+            "skipped_missing_labels": skipped_by_split[split],
+            "source_groups_assigned": group_counts[split],
         }
 
     manifest: dict = {
@@ -145,15 +313,22 @@ def prepare_dataset(
         "source_revision": source_revision,
         "source_class": {"id": CATTLE_ID, "name": "cattle"},
         "target_class": {"id": 0, "name": "cattle"},
-        "splits_preserved": list(SPLITS),
+        "split_policy": (
+            "grouped_source_image_70_20_10" if resplit_by_source_image else "original_verified"
+        ),
+        "original_source_ids_crossing_splits": len(overlaps),
+        "excluded_invalid_sheep_zero_boxes": accepted_errors,
+        "excluded_invalid_sheep_zero_boxes_count": len(accepted_errors),
         "audit_sha256_across_splits": True,
-        "near_duplicate_review": "pending_manual_review",
+        "near_duplicate_review": "pending_manual_review_by_flight_or_scene",
         "license": "not_verified_for_original_source",
         "parameters": {
             "seed": seed,
             "train_negative_ratio": train_negative_ratio,
             "max_train_positives": max_train_positives,
             "skip_missing_labels": skip_missing_labels,
+            "allow_invalid_sheep_zero_boxes": allow_invalid_sheep_zero_boxes,
+            "resplit_by_source_image": resplit_by_source_image,
         },
         "splits": summaries,
     }
@@ -206,6 +381,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--max-train-positives", type=int, default=None)
     parser.add_argument("--skip-missing-labels", action="store_true")
     parser.add_argument("--source-revision", default=None)
+    parser.add_argument("--allow-invalid-sheep-zero-boxes", action="store_true")
+    parser.add_argument("--resplit-by-source-image", action="store_true")
     args = parser.parse_args(argv)
 
     try:
@@ -217,6 +394,8 @@ def main(argv: list[str] | None = None) -> int:
             max_train_positives=args.max_train_positives,
             skip_missing_labels=args.skip_missing_labels,
             source_revision=args.source_revision,
+            allow_invalid_sheep_zero_boxes=args.allow_invalid_sheep_zero_boxes,
+            resplit_by_source_image=args.resplit_by_source_image,
         )
     except (OSError, ValueError) as exc:
         print(f"ERROR: {exc}")
@@ -225,7 +404,10 @@ def main(argv: list[str] | None = None) -> int:
     for split, info in manifest["splits"].items():
         print(f"{split}: {info['images']} imágenes, {info['cattle_boxes']} cajas cattle")
     print(f"Configuración: {args.output / 'dataset.yaml'}")
-    print("Pendiente: inspección visual y revisión de similitud entre imágenes.")
+    print(
+        f"Cajas sheep degeneradas excluidas: {manifest['excluded_invalid_sheep_zero_boxes_count']}"
+    )
+    print("Pendiente: inspección visual y revisión de similitud por vuelo/escena.")
     return 0
 
 

@@ -18,7 +18,7 @@ Una aplicación que permita subir un lote de imágenes aéreas y visualizar las 
 
 ## Estado actual
 
-**Stack definido y herramientas iniciales de datos implementadas.** Se documentó WAID y se agregaron un auditor, un conversor a `cattle=0` y una visualización de etiquetas. **Todavía no hay evidencia documentada de descarga/conversión real, entrenamiento ni API/UI ejecutable.**
+**Stack definido y herramientas iniciales de datos implementadas.** Se documentó WAID y se agregaron un auditor, un conversor a `cattle=0` y una visualización de etiquetas. **WAID ya fue descargado y auditado localmente:** 14.366 imágenes, 51 anotaciones sheep degeneradas y 788 IDs base compartidos entre splits originales. La conversión limpia, el entrenamiento y la API/UI siguen pendientes.
 
 ## Desarrollo local
 
@@ -48,16 +48,16 @@ git clone --depth 1 --filter=blob:none https://github.com/xiaohuicui/WAID.git da
 
 Los datasets descargados quedan en `data/raw/`, ignorado por Git. Las estadísticas reales deben obtenerse de la auditoría; no se atribuyen valores hipotéticos a entrenamientos todavía no realizados.
 
-### Preparación para una clase (Cambio 07)
+### Preparación para una clase (Cambios 07 y 08)
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements-data.txt
-.\.venv\Scripts\python.exe -m scripts.prepare_cattle_dataset --source data/raw/waid-repo/WAID --output data/processed/waid-cattle-pilot --max-train-positives 500 --seed 42
-.\.venv\Scripts\python.exe scripts/validate_yolo_labels.py --labels data/processed/waid-cattle-pilot/labels
-.\.venv\Scripts\python.exe -m scripts.preview_cattle --dataset data/processed/waid-cattle-pilot --split train --count 12 --output reports/generated/cattle-preview.jpg
+.\.venv\Scripts\python.exe -m scripts.prepare_cattle_dataset --source data/raw/waid-repo/WAID --output data/processed/waid-cattle-clean-v1 --max-train-positives 500 --seed 42 --allow-invalid-sheep-zero-boxes --resplit-by-source-image
+.\.venv\Scripts\python.exe scripts/validate_yolo_labels.py --labels data/processed/waid-cattle-clean-v1/labels
+.\.venv\Scripts\python.exe -m scripts.preview_cattle --dataset data/processed/waid-cattle-clean-v1 --split train --count 12 --output reports/generated/cattle-preview.jpg
 ```
 
-La conversión preserva las particiones originales y se detiene ante errores de auditoría; `valid/test` mantienen todos los ejemplos etiquetados, incluidos negativos. Una carpeta de salida existente **no se sobrescribe**. Detalles, comandos completos y advertencias: [`docs/07_PREPARACION_WAID_CATTLE.md`](docs/07_PREPARACION_WAID_CATTLE.md).
+La conversión reagrupa las variantes de una misma fotografía a un solo split y solo permite excluir con una opción explícita las cajas degeneradas conocidas de `sheep=0`; `valid/test` mantienen todos los ejemplos etiquetados, incluidos negativos. Una carpeta de salida existente **no se sobrescribe**. Detalles, comandos y advertencias: [`docs/07_PREPARACION_WAID_CATTLE.md`](docs/07_PREPARACION_WAID_CATTLE.md). Incidencia identificada: [`docs/08_INCIDENCIA_CALIDAD_WAID.md`](docs/08_INCIDENCIA_CALIDAD_WAID.md).
 
 ## Estructura y documentación
 
@@ -75,6 +75,7 @@ La conversión preserva las particiones originales y se detiene ante errores de 
 - [`docs/05_ARQUITECTURA_TECNICA.md`](docs/05_ARQUITECTURA_TECNICA.md): componentes previstos.
 - [`docs/06_FUENTE_WAID.md`](docs/06_FUENTE_WAID.md): fuente de imágenes y adquisición.
 - [`docs/07_PREPARACION_WAID_CATTLE.md`](docs/07_PREPARACION_WAID_CATTLE.md): conversión reproducible e inspección visual.
+- [`docs/08_INCIDENCIA_CALIDAD_WAID.md`](docs/08_INCIDENCIA_CALIDAD_WAID.md): diagnóstico y corrección de anotaciones y splits.
 - [`CONTRIBUTING.md`](CONTRIBUTING.md): historial Git y colaboración.
 
 ## Trabajo en Git
