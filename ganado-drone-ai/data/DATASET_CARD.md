@@ -30,3 +30,16 @@
 Conservar imágenes y etiquetas descargadas en `data/raw/` y datos transformados
 en `data/processed/`, ambos ignorados por Git. Versionar **documentación y scripts**.
 No publicar imágenes de terceros ni checkpoints sin revisar licencias y permisos.
+
+## Herramienta de inspección implementada (Cambio 05)
+
+Tras confirmar el mapeo de clases y convertir las anotaciones al formato de una clase,
+validar los `.txt` de la carpeta `labels/train` (y repetir para val/test):
+
+```powershell
+.\.venv\Scripts\python.exe scripts/validate_yolo_labels.py --labels data/processed/labels/train
+```
+
+La comprobación solo evalúa **integridad sintáctica y geométrica básica**; no
+sustituye la inspección visual, la auditoría del split o las métricas del detector.
+No hay dataset seleccionado en este momento.

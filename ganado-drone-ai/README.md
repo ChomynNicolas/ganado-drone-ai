@@ -18,7 +18,7 @@ Una aplicación que permita subir un lote de imágenes aéreas y visualizar las 
 
 ## Estado del proyecto
 
-**Arquitectura documentada, entorno Python configurado y carpetas de trabajo organizadas.** Se crearon los directorios de API, UI, datos, configuraciones, modelos y resultados, pero **no** existe aún un detector, servidor, dashboard ni dataset validado.
+**Arquitectura y entorno documentados; primera herramienta de control de datos disponible.** Se puede validar la geometría de etiquetas YOLO de una clase, pero todavía **no** se ha descargado un dataset real, entrenado un detector ni implementado la API o UI.
 
 ## Requisitos académicos
 
@@ -50,6 +50,22 @@ py -3.11 -m venv .venv
 
 Si el comando `py -3.11` falla, instalar primero Python 3.11; no reemplazarlo silenciosamente por otra versión. Los comandos usan el intérprete de `.venv` directamente y no requieren activar el entorno ni cambiar políticas de PowerShell.
 
+## Validación de etiquetas YOLO (sin dataset descargado)
+
+Después de convertir las anotaciones originales a la **única clase `cattle=0`**,
+ejecutar el validador sobre un archivo o directorio local:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/validate_yolo_labels.py --labels data/processed/labels/train
+```
+
+El comando verifica formato de cinco columnas, ID de clase, rangos normalizados,
+cajas dentro de la imagen, valores no finitos y etiquetas idénticas duplicadas.
+Devuelve código **0** sin errores, **1** si hay anotaciones inválidas o **2** si los
+argumentos/ruta son incorrectos. No descarga datos, no repara etiquetas y **no**
+verifica correspondencia imagen-etiqueta, calidad visual ni leakage entre splits.
+El script solo se ejecutará con datos reales cuando existan.
+
 `requirements-dev.txt` fija por ahora **solo** `pytest` y `ruff`; las dependencias del entrenamiento, API y UI se incorporarán cuando exista código que las necesite. `pyproject.toml` configura las herramientas, **no** declara aún un paquete Python instalable. La verificación prueba la configuración de desarrollo, no el desempeño del futuro modelo.
 
 ## Estructura de trabajo
@@ -60,7 +76,7 @@ Si el comando `py -3.11` falla, instalar primero Python 3.11; no reemplazarlo si
 - `configs/`: configuraciones versionadas de experimentos (sin rutas locales privadas).
 - `models/`: checkpoints locales excluidos de Git; se documentará cómo obtenerlos.
 - `reports/`: material de métricas y del informe científico.
-- `scripts/`: verificadores y posteriores tareas de datos/ML.
+- `scripts/`: verificación del entorno y validación estática de etiquetas YOLO; entrenamiento pendiente.
 - `tests/`: pruebas automatizadas de las funcionalidades existentes.
 
 ## Organización
