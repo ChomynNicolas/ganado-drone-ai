@@ -76,7 +76,7 @@ Respuesta de ejemplo **solo de esquema** (coordenadas ficticias para ilustrar fo
 - Guardar configuración de experimentos, versiones, semillas, logs, métricas e imágenes de errores representativos.
 - Priorizar GPU local GTX 1650 4 GB con modelo pequeño y batch adaptado a memoria; usar Colab gratuito si no alcanza.
 
-## 6. Estructura objetivo (todavía NO creada)
+## 6. Estructura objetivo (directorios base creados en Cambio 04)
 
 ```text
 api/app/            # aplicación FastAPI y servicio del detector
@@ -91,7 +91,7 @@ reports/            # tablas/figuras verificables del informe
 docs/               # arquitectura, ADR, procesos y registros
 ```
 
-Se crearán las carpetas **a medida que tengan contenido real**. No agregar placeholders innecesarios para aparentar avance.
+Se crearon las carpetas con documentación de propósito y un paquete Python vacío para la futura API. **Eso no implica que los servicios, scripts de entrenamiento o detector estén implementados.** Agregar los archivos ejecutables a medida que se desarrollen.
 
 ## 7. Gates de integración
 

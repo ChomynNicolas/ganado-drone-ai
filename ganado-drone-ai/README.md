@@ -18,7 +18,7 @@ Una aplicación que permita subir un lote de imágenes aéreas y visualizar las 
 
 ## Estado del proyecto
 
-**Arquitectura documentada y entorno de desarrollo configurado en archivos.** La instalación local de Python y las herramientas debe verificarse en cada equipo. Todavía no existen detector, API, interfaz ni dataset validado.
+**Arquitectura documentada, entorno Python configurado y carpetas de trabajo organizadas.** Se crearon los directorios de API, UI, datos, configuraciones, modelos y resultados, pero **no** existe aún un detector, servidor, dashboard ni dataset validado.
 
 ## Requisitos académicos
 
@@ -51,6 +51,17 @@ py -3.11 -m venv .venv
 Si el comando `py -3.11` falla, instalar primero Python 3.11; no reemplazarlo silenciosamente por otra versión. Los comandos usan el intérprete de `.venv` directamente y no requieren activar el entorno ni cambiar políticas de PowerShell.
 
 `requirements-dev.txt` fija por ahora **solo** `pytest` y `ruff`; las dependencias del entrenamiento, API y UI se incorporarán cuando exista código que las necesite. `pyproject.toml` configura las herramientas, **no** declara aún un paquete Python instalable. La verificación prueba la configuración de desarrollo, no el desempeño del futuro modelo.
+
+## Estructura de trabajo
+
+- `api/app/`: paquete reservado para el backend; no existe endpoint operativo.
+- `ui/`: interfaz prevista, aún sin código ejecutable.
+- `data/DATASET_CARD.md`: ficha para documentar los datos cuando se adquieran.
+- `configs/`: configuraciones versionadas de experimentos (sin rutas locales privadas).
+- `models/`: checkpoints locales excluidos de Git; se documentará cómo obtenerlos.
+- `reports/`: material de métricas y del informe científico.
+- `scripts/`: verificadores y posteriores tareas de datos/ML.
+- `tests/`: pruebas automatizadas de las funcionalidades existentes.
 
 ## Organización
 
