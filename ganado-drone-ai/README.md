@@ -18,7 +18,7 @@ Una aplicación que permita subir un lote de imágenes aéreas y visualizar las 
 
 ## Estado del proyecto
 
-**Inicialización del repositorio.** Todavía no hay dataset seleccionado o procesado, modelo entrenado, API funcional ni interfaz implementada. Las decisiones técnicas y resultados experimentales se registrarán conforme se realice el trabajo.
+**Alcance y arquitectura documentados.** El stack inicial está definido para construir el MVP, pero aún no se instaló el entorno ni se implementó el detector, la API o la interfaz. El dataset sigue pendiente de selección y validación.
 
 ## Requisitos académicos
 
@@ -36,7 +36,9 @@ Los requisitos y criterios están detallados en [`docs/01_ALCANCE.md`](docs/01_A
 
 - [`docs/01_ALCANCE.md`](docs/01_ALCANCE.md): objetivo, alcance y requisitos de la consigna.
 - [`docs/02_BACKLOG_INICIAL.md`](docs/02_BACKLOG_INICIAL.md): trabajo propuesto, todavía pendiente de convertir en Issues.
-- [`docs/03_DECISIONES_PENDIENTES.md`](docs/03_DECISIONES_PENDIENTES.md): decisiones técnicas que deben justificarse.
+- [`docs/03_DECISIONES_TECNICAS.md`](docs/03_DECISIONES_TECNICAS.md): tecnologías seleccionadas y decisiones que siguen abiertas.
+- [`docs/05_ARQUITECTURA_TECNICA.md`](docs/05_ARQUITECTURA_TECNICA.md): componentes, flujo de inferencia, API propuesta y límites.
+- [`docs/adr/ADR-001-stack.md`](docs/adr/ADR-001-stack.md): justificación y trade-offs del stack.
 - [`docs/04_VALIDACION_Y_RIESGOS.md`](docs/04_VALIDACION_Y_RIESGOS.md): criterios de evaluación y riesgos de datos.
 - [`CONTRIBUTING.md`](CONTRIBUTING.md): colaboración de Nicolás y Sebastián.
 
