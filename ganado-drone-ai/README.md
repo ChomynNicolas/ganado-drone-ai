@@ -18,7 +18,7 @@ Una aplicación que permita subir un lote de imágenes aéreas y visualizar las 
 
 ## Estado actual
 
-**Stack definido y herramientas iniciales de datos implementadas.** Se documentó WAID y se agregaron un auditor, un conversor a `cattle=0` y una visualización de etiquetas. **WAID ya fue descargado y auditado localmente:** 14.366 imágenes, 51 anotaciones sheep degeneradas y 788 IDs base compartidos entre splits originales. El dataset piloto de una clase fue generado y pasó los controles automáticos; el entrenamiento y la API/UI siguen pendientes.
+**Stack definido y herramientas iniciales de datos implementadas.** Se documentó WAID y se agregaron un auditor, un conversor a `cattle=0` y una visualización de etiquetas. **WAID ya fue descargado y auditado localmente:** 14.366 imágenes, 51 anotaciones sheep degeneradas y 788 IDs base compartidos entre splits originales. El dataset piloto de una clase fue generado y pasó los controles automáticos. Hay código inicial para inferencia baseline YOLO11n sobre fotografías; el entrenamiento específico sobre WAID y la API/UI siguen pendientes.
 
 ## Desarrollo local
 
@@ -67,6 +67,18 @@ La conversión reagrupa las variantes de una misma fotografía a un solo split y
 
 Solo se publica el resumen Markdown; los JSON e imágenes originales siguen fuera de Git.
 
+### Baseline COCO (Cambio 10)
+
+El detector preentrenado de COCO reconoce la clase `cow` (ID 19), distinta de la clase `cattle=0` del dataset procesado. No constituye un modelo entrenado sobre fotografías aéreas.
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-ml.txt
+.\.venv\Scripts\python.exe -m scripts.download_baseline
+.\.venv\Scripts\python.exe -m scripts.infer_baseline --source data/processed/waid-cattle-clean-v1/images/train --limit 5 --device auto
+```
+
+La instalación de PyTorch CUDA se explica en [`docs/10_BASELINE_YOLO.md`](docs/10_BASELINE_YOLO.md); se recomienda hacerlo antes de instalar el resto de requisitos ML. Los pesos, anotaciones, fotografías y reportes de inferencia no se publican en Git.
+
 ## Estructura y documentación
 
 - `api/app/`: backend aún no implementado.
@@ -85,6 +97,7 @@ Solo se publica el resumen Markdown; los JSON e imágenes originales siguen fuer
 - [`docs/07_PREPARACION_WAID_CATTLE.md`](docs/07_PREPARACION_WAID_CATTLE.md): conversión reproducible e inspección visual.
 - [`docs/08_INCIDENCIA_CALIDAD_WAID.md`](docs/08_INCIDENCIA_CALIDAD_WAID.md): diagnóstico y corrección de anotaciones y splits.
 - [`docs/09_RESULTADOS_DATASET.md`](docs/09_RESULTADOS_DATASET.md): evidencia local generada automáticamente y versionada.
+- [`docs/10_BASELINE_YOLO.md`](docs/10_BASELINE_YOLO.md): instalación, pesos y prueba de inferencia COCO.
 - [`CONTRIBUTING.md`](CONTRIBUTING.md): historial Git y colaboración.
 
 ## Trabajo en Git
@@ -93,4 +106,4 @@ Nicolás registra cambios pequeños comprobados en `main` y Sebastián utiliza s
 
 ## Entregables pendientes
 
-Evidencia de dataset real procesado y evaluado, detector con fine-tuning reproducible, API REST, interfaz para lotes, Docker Compose, informe IEEE de exactamente tres páginas y demostración en vivo. Nada de esto debe declararse como terminado hasta que haya evidencia de ejecución.
+Modelo con fine-tuning reproducible, API REST, interfaz para lotes, Docker Compose, informe IEEE de exactamente tres páginas y demostración en vivo. Nada de esto debe declararse como terminado hasta que haya evidencia de ejecución.

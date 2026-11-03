@@ -25,3 +25,10 @@ No modifica el dataset de origen, ni entrena un detector ni publica imágenes. L
 La primera auditoría real de WAID reveló **51 cajas `sheep=0` degeneradas** y **788 IDs de foto original repartidos en más de un split**. No modificar `data/raw`: consultar [`docs/08_INCIDENCIA_CALIDAD_WAID.md`](../docs/08_INCIDENCIA_CALIDAD_WAID.md). Las opciones de limpieza y de regrouping deben invocarse explícitamente y se registran en el manifiesto.
 
 Para versionar los resultados ejecutados, usar `python -m scripts.record_dataset_results --manifest data/processed/waid-cattle-clean-v1/manifest.json --groups reports/generated/split_group_audit.json --output docs/09_RESULTADOS_DATASET.md`.
+
+## Baseline (Cambio 10)
+
+- `download_baseline.py`: descarga el checkpoint YOLO11n a `models/` e imprime SHA-256.
+- `infer_baseline.py`: detecta únicamente `cow` desde un checkpoint COCO; genera JPGs anotados y `predictions.json` bajo `reports/generated/baseline`.
+
+Ver [`docs/10_BASELINE_YOLO.md`](../docs/10_BASELINE_YOLO.md). Este paso **no** entrena el modelo en WAID.

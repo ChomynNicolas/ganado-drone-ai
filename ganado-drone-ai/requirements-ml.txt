@@ -1,0 +1,5 @@
+# Para GPU Windows NVIDIA: instalar primero torch/torchvision con el índice CUDA.
+# Véase docs/10_BASELINE_YOLO.md. Estas versiones están fijadas para el experimento.
+torch==2.9.1
+torchvision==0.24.1
+ultralytics==8.4.198
