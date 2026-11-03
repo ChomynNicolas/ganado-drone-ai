@@ -6,6 +6,7 @@
 - `prepare_cattle_dataset.py`: audita WAID con hashes y prepara una copia derivada de **una clase**, reagrupando variantes del mismo origen en splits independientes.
 - `check_split_groups.py`: comprueba que variantes de una fotografía base no crucen train/valid/test.
 - `preview_cattle.py`: crea un mosaico de imágenes con bounding boxes, usando Pillow. Guardar en `reports/generated/`.
+- `record_dataset_results.py`: genera un reporte Markdown versionable con la revisión real de WAID y los resultados de la preparación.
 
 Para ejecutar las herramientas desde la raíz del repositorio:
 
@@ -22,3 +23,5 @@ Guía de decisiones y advertencias: [`docs/07_PREPARACION_WAID_CATTLE.md`](../do
 No modifica el dataset de origen, ni entrena un detector ni publica imágenes. Los datos derivados, checkpoints, vistas previas y resultados generados están excluidos del repositorio mediante `.gitignore`.
 
 La primera auditoría real de WAID reveló **51 cajas `sheep=0` degeneradas** y **788 IDs de foto original repartidos en más de un split**. No modificar `data/raw`: consultar [`docs/08_INCIDENCIA_CALIDAD_WAID.md`](../docs/08_INCIDENCIA_CALIDAD_WAID.md). Las opciones de limpieza y de regrouping deben invocarse explícitamente y se registran en el manifiesto.
+
+Para versionar los resultados ejecutados, usar `python -m scripts.record_dataset_results --manifest data/processed/waid-cattle-clean-v1/manifest.json --groups reports/generated/split_group_audit.json --output docs/09_RESULTADOS_DATASET.md`.

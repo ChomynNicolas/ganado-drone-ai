@@ -18,7 +18,7 @@ Una aplicación que permita subir un lote de imágenes aéreas y visualizar las 
 
 ## Estado actual
 
-**Stack definido y herramientas iniciales de datos implementadas.** Se documentó WAID y se agregaron un auditor, un conversor a `cattle=0` y una visualización de etiquetas. **WAID ya fue descargado y auditado localmente:** 14.366 imágenes, 51 anotaciones sheep degeneradas y 788 IDs base compartidos entre splits originales. La conversión limpia, el entrenamiento y la API/UI siguen pendientes.
+**Stack definido y herramientas iniciales de datos implementadas.** Se documentó WAID y se agregaron un auditor, un conversor a `cattle=0` y una visualización de etiquetas. **WAID ya fue descargado y auditado localmente:** 14.366 imágenes, 51 anotaciones sheep degeneradas y 788 IDs base compartidos entre splits originales. El dataset piloto de una clase fue generado y pasó los controles automáticos; el entrenamiento y la API/UI siguen pendientes.
 
 ## Desarrollo local
 
@@ -46,7 +46,7 @@ git clone --depth 1 --filter=blob:none https://github.com/xiaohuicui/WAID.git da
 .\.venv\Scripts\python.exe -m scripts.audit_waid --dataset data/raw/waid-repo/WAID --hash-check --output reports/generated/waid_audit.json
 ```
 
-Los datasets descargados quedan en `data/raw/`, ignorado por Git. Las estadísticas reales deben obtenerse de la auditoría; no se atribuyen valores hipotéticos a entrenamientos todavía no realizados.
+Los datasets descargados quedan en `data/raw/`, ignorado por Git. Los resultados locales de auditoría y preparación se registran con `scripts/record_dataset_results.py` en `docs/09_RESULTADOS_DATASET.md`. No son métricas del modelo.
 
 ### Preparación para una clase (Cambios 07 y 08)
 
@@ -58,6 +58,14 @@ Los datasets descargados quedan en `data/raw/`, ignorado por Git. Las estadísti
 ```
 
 La conversión reagrupa las variantes de una misma fotografía a un solo split y solo permite excluir con una opción explícita las cajas degeneradas conocidas de `sheep=0`; `valid/test` mantienen todos los ejemplos etiquetados, incluidos negativos. Una carpeta de salida existente **no se sobrescribe**. Detalles, comandos y advertencias: [`docs/07_PREPARACION_WAID_CATTLE.md`](docs/07_PREPARACION_WAID_CATTLE.md). Incidencia identificada: [`docs/08_INCIDENCIA_CALIDAD_WAID.md`](docs/08_INCIDENCIA_CALIDAD_WAID.md).
+
+### Registro reproducible de la preparación (Cambio 09)
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.record_dataset_results --manifest data/processed/waid-cattle-clean-v1/manifest.json --groups reports/generated/split_group_audit.json --output docs/09_RESULTADOS_DATASET.md
+```
+
+Solo se publica el resumen Markdown; los JSON e imágenes originales siguen fuera de Git.
 
 ## Estructura y documentación
 
@@ -76,6 +84,7 @@ La conversión reagrupa las variantes de una misma fotografía a un solo split y
 - [`docs/06_FUENTE_WAID.md`](docs/06_FUENTE_WAID.md): fuente de imágenes y adquisición.
 - [`docs/07_PREPARACION_WAID_CATTLE.md`](docs/07_PREPARACION_WAID_CATTLE.md): conversión reproducible e inspección visual.
 - [`docs/08_INCIDENCIA_CALIDAD_WAID.md`](docs/08_INCIDENCIA_CALIDAD_WAID.md): diagnóstico y corrección de anotaciones y splits.
+- [`docs/09_RESULTADOS_DATASET.md`](docs/09_RESULTADOS_DATASET.md): evidencia local generada automáticamente y versionada.
 - [`CONTRIBUTING.md`](CONTRIBUTING.md): historial Git y colaboración.
 
 ## Trabajo en Git

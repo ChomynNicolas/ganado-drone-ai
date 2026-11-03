@@ -18,18 +18,16 @@
 | Preparación | [`docs/07_PREPARACION_WAID_CATTLE.md`](../docs/07_PREPARACION_WAID_CATTLE.md) |
 | Código | `scripts/prepare_cattle_dataset.py`, `scripts/preview_cattle.py` |
 
-## Versión utilizada — completar luego de ejecución real
+## Versión utilizada — ejecución verificada (2026-11-03)
 
-- Fecha de descarga: **pendiente**
-- Hash del commit WAID o URL exacta del ZIP: **pendiente**
-- Auditoría `--hash-check`: **ejecutada; 14.366 imágenes, 63.090 cajas válidas cattle; 51 errores `sheep=0`**
-- Conversión (ruta local y parámetros): **pendiente**
-- Train: imágenes / cajas cattle / negativos = **pendiente**
-- Valid: imágenes / cajas cattle / negativos = **pendiente**
-- Test: imágenes / cajas cattle / negativos = **pendiente**
-- Errores y advertencias del auditor: **51 errores `width/height` de sheep y 2 advertencias**; se detectaron **788 IDs base en varios splits** mediante comprobación adicional
-- Revisión visual de cajas en los tres splits: **pendiente**
-- Evaluación de escenas o vuelos similares entre splits: **pendiente**
+WAID fue auditado y el conjunto piloto de una clase fue preparado localmente. La evidencia de la ejecución se genera directamente desde `manifest.json` y `split_group_audit.json` mediante `scripts/record_dataset_results.py`. No se incluyen fotografías ni resultados que no hayan sido ejecutados.
+
+**Resumen comunicado por el equipo:** 14.366 imágenes originales; 51 cajas degeneradas de `sheep` excluidas; 788 IDs base cruzaban particiones originalmente. Dataset limpio: 625 imágenes `train`, 2.887 `valid`, 1.434 `test` (4.946 total), 25.640 cajas bovinas, 0 grupos compartidos y 0 errores en etiquetas procesadas.
+
+- Evidencia versionada: [`docs/09_RESULTADOS_DATASET.md`](../docs/09_RESULTADOS_DATASET.md), generada en la computadora con los manifiestos reales.
+- Revisión exacta de WAID y parámetros: documento generado, no rellenar con un hash inventado.
+- Inspección visual de las imágenes y control de escenas del mismo vuelo: **pendientes**.
+- La muestra de `train` de 625 imágenes es un **piloto**, no un entrenamiento final.
 
 ## Política de preparación
 
