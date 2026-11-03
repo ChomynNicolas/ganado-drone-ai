@@ -14,88 +14,61 @@ Diseñar un sistema de visión por computadora que detecte y contabilice ganado 
 
 Una aplicación que permita subir un lote de imágenes aéreas y visualizar las detecciones con cajas delimitadoras, cantidad por imagen y un total acumulado de detecciones del lote.
 
-> **Limitación a validar:** si las fotografías se superponen, una vaca puede aparecer en varias imágenes. La suma de detecciones no debe presentarse como cantidad de animales únicos sin deduplicación demostrada.
+> Si las fotografías se superponen, una vaca puede aparecer en varias imágenes. La suma de detecciones no constituye un censo de animales únicos.
 
-## Estado del proyecto
+## Estado actual
 
-**Arquitectura y entorno documentados; primera herramienta de control de datos disponible.** Se puede validar la geometría de etiquetas YOLO de una clase, pero todavía **no** se ha descargado un dataset real, entrenado un detector ni implementado la API o UI.
+**Stack definido, entorno Python y validadores de datos implementados.** Se seleccionó WAID como fuente candidata y se agregó el auditor de su formato original. **No se ha descargado ni auditado localmente WAID**, convertido las etiquetas, entrenado un detector ni construido la API/UI.
 
-## Requisitos académicos
+## Desarrollo local
 
-- Dataset limpio y documentado, preferentemente relevante al contexto paraguayo.
-- Modelo entrenado con evaluación formal y metodología reproducible.
-- API REST para acceder a la predicción.
-- Interfaz interactiva con carga de imágenes y visualización de resultados.
-- Código Git con desarrollo progresivo, tareas y commits trazables.
-- Docker para ejecutar la solución completa (aparece como puntos extra en la consigna).
-- Informe IEEE de **exactamente 3 páginas** y demo en vivo en la defensa.
-
-Los requisitos y criterios están detallados en [`docs/01_ALCANCE.md`](docs/01_ALCANCE.md).
-
-
-## Entorno de desarrollo (Windows / PowerShell)
-
-**Requisito:** Python 3.11 instalado (comprobar con `py -3.11 --version`). El entorno virtual y sus paquetes no se suben a Git.
+**Requisito:** Python 3.11 instalado.
 
 ```powershell
 py -3.11 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install --upgrade pip
 .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
-
-.\.venv\Scripts\python.exe scripts/check_environment.py
 .\.venv\Scripts\python.exe -m pytest -q
 .\.venv\Scripts\python.exe -m ruff check scripts tests
 .\.venv\Scripts\python.exe -m ruff format --check scripts tests
 ```
 
-Si el comando `py -3.11` falla, instalar primero Python 3.11; no reemplazarlo silenciosamente por otra versión. Los comandos usan el intérprete de `.venv` directamente y no requieren activar el entorno ni cambiar políticas de PowerShell.
+## Dataset candidato: WAID
 
-## Validación de etiquetas YOLO (sin dataset descargado)
+Fuente oficial: https://github.com/xiaohuicui/WAID
 
-Después de convertir las anotaciones originales a la **única clase `cattle=0`**,
-ejecutar el validador sobre un archivo o directorio local:
+La fuente original dispone de imágenes/etiquetas en `train`, `valid` y `test` y `classes.txt` declara `cattle=1`. **No usar el validador de una clase sobre etiquetas originales.**
+
+Descarga, auditoría, licencia y reproducibilidad: [`docs/06_FUENTE_WAID.md`](docs/06_FUENTE_WAID.md).
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/validate_yolo_labels.py --labels data/processed/labels/train
+git clone --depth 1 --filter=blob:none https://github.com/xiaohuicui/WAID.git data/raw/waid-repo
+.\.venv\Scripts\python.exe -m scripts.audit_waid --dataset data/raw/waid-repo/WAID --hash-check --output reports/generated/waid_audit.json
 ```
 
-El comando verifica formato de cinco columnas, ID de clase, rangos normalizados,
-cajas dentro de la imagen, valores no finitos y etiquetas idénticas duplicadas.
-Devuelve código **0** sin errores, **1** si hay anotaciones inválidas o **2** si los
-argumentos/ruta son incorrectos. No descarga datos, no repara etiquetas y **no**
-verifica correspondencia imagen-etiqueta, calidad visual ni leakage entre splits.
-El script solo se ejecutará con datos reales cuando existan.
+Los datasets descargados quedan en `data/raw/`, ignorado por Git. Las estadísticas reales deben obtenerse de la auditoría; no se atribuyen valores hipotéticos a entrenamientos todavía no realizados.
 
-`requirements-dev.txt` fija por ahora **solo** `pytest` y `ruff`; las dependencias del entrenamiento, API y UI se incorporarán cuando exista código que las necesite. `pyproject.toml` configura las herramientas, **no** declara aún un paquete Python instalable. La verificación prueba la configuración de desarrollo, no el desempeño del futuro modelo.
+## Estructura y documentación
 
-## Estructura de trabajo
+- `api/app/`: backend aún no implementado.
+- `ui/`: dashboard aún no implementado.
+- `data/DATASET_CARD.md`: fuente, etiquetas, restricciones y evidencia pendiente.
+- `configs/`: futura configuración de entrenamiento.
+- `models/`: checkpoints locales ignorados por Git.
+- `reports/`: informe y métricas; `reports/generated/` está ignorado.
+- `scripts/`: herramientas de control del entorno y datos.
+- `tests/`: pruebas sintéticas de scripts; **no** validación real del modelo.
+- [`docs/01_ALCANCE.md`](docs/01_ALCANCE.md): consigna y alcance.
+- [`docs/02_BACKLOG_INICIAL.md`](docs/02_BACKLOG_INICIAL.md): actividades y criterios de aceptación.
+- [`docs/03_DECISIONES_TECNICAS.md`](docs/03_DECISIONES_TECNICAS.md): selección de tecnologías.
+- [`docs/05_ARQUITECTURA_TECNICA.md`](docs/05_ARQUITECTURA_TECNICA.md): componentes previstos.
+- [`docs/06_FUENTE_WAID.md`](docs/06_FUENTE_WAID.md): fuente de imágenes y adquisición.
+- [`CONTRIBUTING.md`](CONTRIBUTING.md): historial Git y colaboración.
 
-- `api/app/`: paquete reservado para el backend; no existe endpoint operativo.
-- `ui/`: interfaz prevista, aún sin código ejecutable.
-- `data/DATASET_CARD.md`: ficha para documentar los datos cuando se adquieran.
-- `configs/`: configuraciones versionadas de experimentos (sin rutas locales privadas).
-- `models/`: checkpoints locales excluidos de Git; se documentará cómo obtenerlos.
-- `reports/`: material de métricas y del informe científico.
-- `scripts/`: verificación del entorno y validación estática de etiquetas YOLO; entrenamiento pendiente.
-- `tests/`: pruebas automatizadas de las funcionalidades existentes.
+## Trabajo en Git
 
-## Organización
+Nicolás registra cambios pequeños comprobados en `main` y Sebastián utiliza su cuenta e identidad Git cuando contribuya. Las imágenes, las etiquetas y los pesos entrenados se mantienen fuera del repositorio. Los Issues pueden documentar cambios sin PR obligatorios en esta etapa.
 
-- [`docs/01_ALCANCE.md`](docs/01_ALCANCE.md): objetivo, alcance y requisitos de la consigna.
-- [`docs/02_BACKLOG_INICIAL.md`](docs/02_BACKLOG_INICIAL.md): trabajo propuesto, todavía pendiente de convertir en Issues.
-- [`docs/03_DECISIONES_TECNICAS.md`](docs/03_DECISIONES_TECNICAS.md): tecnologías seleccionadas y decisiones que siguen abiertas.
-- [`docs/05_ARQUITECTURA_TECNICA.md`](docs/05_ARQUITECTURA_TECNICA.md): componentes, flujo de inferencia, API propuesta y límites.
-- [`docs/adr/ADR-001-stack.md`](docs/adr/ADR-001-stack.md): justificación y trade-offs del stack.
-- [`docs/04_VALIDACION_Y_RIESGOS.md`](docs/04_VALIDACION_Y_RIESGOS.md): criterios de evaluación y riesgos de datos.
-- [`CONTRIBUTING.md`](CONTRIBUTING.md): colaboración de Nicolás y Sebastián.
+## Entregables pendientes
 
-## Trabajo y contribuciones
-
-En la etapa inicial, **Nicolás registra cambios pequeños y comprobables directamente en `main`**: Issue (cuando corresponda) → implementación → validación → commit → push. No se exigen Pull Requests ni revisiones por ahora. Sebastián será colaborador y registrará contribuciones propias cuando las realice. No se crean commits ficticios para aparentar evolución. Ver [`CONTRIBUTING.md`](CONTRIBUTING.md).
-
-## Fuentes de la consigna
-
-- `Proyecto_ia_para_el_2026.docx`: catálogo, proyecto asignado, entregables y evaluación.
-- `Formato presentacion documentos IEEE ES.doc`: formato de referencia para el informe.
-
-Estos documentos se conservan fuera del repositorio hasta decidir cómo incluirlos y bajo qué permisos.
+Datos procesados y evaluados, detector con fine-tuning reproducible, API REST, interfaz para lotes, Docker Compose, informe IEEE de exactamente tres páginas y demostración en vivo. Nada de esto debe declararse como terminado hasta que haya evidencia de ejecución.

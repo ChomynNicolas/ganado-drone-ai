@@ -1,15 +1,11 @@
-# Utilidades ejecutables
+# Herramientas disponibles
 
-Utilidad actual: `scripts/check_environment.py`, que verifica Python y las
-versiones de las herramientas de desarrollo.
-
-Utilidad adicional: `scripts/validate_yolo_labels.py`, que inspecciona archivos
-YOLO `.txt` después de convertir etiquetas originales a `cattle=0`.
+- `scripts/check_environment.py`: valida versión de Python y herramientas de desarrollo.
+- `scripts/validate_yolo_labels.py`: valida etiquetas ya convertidas a una clase (`cattle=0`).
+- `scripts/audit_waid.py`: inspecciona la estructura original WAID, clases (`cattle=1`), etiquetas por split y duplicados exactos opcionales.
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/validate_yolo_labels.py --labels data/processed/labels/train
+.\.venv\Scripts\python.exe -m scripts.audit_waid --dataset data/raw/waid-repo/WAID --hash-check --output reports/generated/waid_audit.json
 ```
 
-El resultado no valida imágenes, licencias ni splits: esas comprobaciones quedan
-pendientes. Scripts de conversión, entrenamiento y evaluación se incorporarán
-cuando existan datos reales y código que pueda ejecutarse.
+Todos estos scripts pueden usarse sin PyTorch. No entrenan modelos y no modifican datos brutos.

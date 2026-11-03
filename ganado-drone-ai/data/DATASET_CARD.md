@@ -1,45 +1,46 @@
-# Datasheet del dataset — pendiente de adquisición
+# Datasheet — WAID (fuente candidata seleccionada para auditoría)
 
-**Estado:** ningún conjunto de imágenes descargado ni verificado en este repositorio.
+**Estado:** fuente identificada y formato verificado en el repositorio oficial; **descarga y validación local pendientes**.
 
-| Aspecto | Registro |
+| Campo | Registro |
 |---|---|
-| Dataset seleccionado | Pendiente: WAID es solo candidato |
-| URL y versión/fecha de descarga | Pendiente |
-| Licencia de uso y redistribución | Pendiente de verificación |
-| Autores y procedencia | Pendiente |
-| Zona geográfica / dominio de captura | Pendiente |
-| Clases de origen y mapeo a `cattle=0` | Pendiente |
-| Número de imágenes y anotaciones | Pendiente |
-| Resolución y variabilidad (altura/iluminación) | Pendiente |
-| Train/validation/test y criterio de separación | Pendiente |
-| Riesgos de leakage por vuelo, escena o duplicados | Pendiente |
-| Limitaciones para inferir en Paraguay | Pendiente |
+| Dataset | WAID — Wildlife Aerial Images from Drone |
+| Artículo | Mou, Liu, Zhu y Cui, *Applied Sciences* 13(18), 10397 (2023) |
+| DOI | https://doi.org/10.3390/app131810397 |
+| Fuente original | https://github.com/xiaohuicui/WAID |
+| Estructura observada | `WAID/classes.txt`, `WAID/images/{train,valid,test}`, `WAID/labels/{train,valid,test}` |
+| Etiquetas | YOLO: `class_id x_center y_center width height` |
+| Clases originales | `0 sheep`, `1 cattle`, `2 seal`, `3 camelus`, `4 kiang`, `5 zebra` |
+| Clase del futuro modelo | `0 cattle` tras filtrar/reindexar en **Cambio 07** |
+| Resolución típica | 640×640 según catálogo secundario; comprobar localmente |
+| Cantidad de imágenes/anotaciones | **Pendiente de medir con auditoría local** |
+| Splits | Originales train/valid/test; no mezclar antes de inspeccionar leakage |
+| Licencia | **No confirmada para el repositorio original**; fuente pública no implica permiso de redistribución |
+| Procedencia paraguaya | No acreditada; limitación de transferencia de dominio |
+| Fecha/commit de descarga | **Pendiente de registrar después de descargar** |
+| SHA-256 / duplicados | **Pendiente**; correr auditoría con `--hash-check` |
 
-## Criterios de aceptación del dataset
+## Adquisición local y reproducibilidad
 
-1. Inspeccionar imágenes y etiquetas originales manualmente antes de convertirlas.
-2. Documentar licencia, fuente exacta y autorización para usar/publicar ejemplos.
-3. Mapear clases de origen de manera explícita; **no asumir que vaca es clase 0**.
-4. Verificar validez geométrica de anotaciones y revisar muestras visualmente.
-5. Separar train, validation y test sin mezclar imágenes correlacionadas de una misma escena/vuelo.
-6. Documentar hashes/versión del dataset y semilla del particionado cuando aplique.
-
-## Almacenamiento
-
-Conservar imágenes y etiquetas descargadas en `data/raw/` y datos transformados
-en `data/processed/`, ambos ignorados por Git. Versionar **documentación y scripts**.
-No publicar imágenes de terceros ni checkpoints sin revisar licencias y permisos.
-
-## Herramienta de inspección implementada (Cambio 05)
-
-Tras confirmar el mapeo de clases y convertir las anotaciones al formato de una clase,
-validar los `.txt` de la carpeta `labels/train` (y repetir para val/test):
+Consultar [`docs/06_FUENTE_WAID.md`](../docs/06_FUENTE_WAID.md). El equipo debe registrar el hash del commit fuente:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/validate_yolo_labels.py --labels data/processed/labels/train
+git -C data/raw/waid-repo rev-parse HEAD
 ```
 
-La comprobación solo evalúa **integridad sintáctica y geométrica básica**; no
-sustituye la inspección visual, la auditoría del split o las métricas del detector.
-No hay dataset seleccionado en este momento.
+La descarga se guarda en `data/raw/waid-repo/`, ignorado por Git. Versionar la ficha y las herramientas, no imágenes ni etiquetas de terceros.
+
+## Auditoría pendiente
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.audit_waid --dataset data/raw/waid-repo/WAID --hash-check --output reports/generated/waid_audit.json
+```
+
+La salida debe conservarse localmente para contrastar cantidades reales con las publicadas. Revisar errores, advertencias y muestras visuales. **No afirmar todavía que se dispone de un dataset apto para entrenamiento.**
+
+## Riesgos de metodología
+
+- Detección de duplicados por SHA-256 solo verifica bytes idénticos; no escenas muy similares o versiones aumentadas de la misma imagen.
+- No hay evidencia de separación por vuelo/escena en el repositorio de origen; se investigará antes de confiar en métricas de test.
+- Imágenes sin etiquetas pueden ser verdaderos negativos o anotaciones faltantes; el auditor avisa pero no decide.
+- El conteo acumulado de cajas sobre imágenes superpuestas **no equivale al número de animales únicos**.
