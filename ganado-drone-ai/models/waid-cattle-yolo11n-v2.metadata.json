@@ -1,0 +1,23 @@
+{
+  "created_at_utc": "2026-11-06T05:01:06.920598+00:00",
+  "dataset_yaml": "data/processed/waid-cattle-clean-v1/dataset.yaml",
+  "dataset_manifest": "data/processed/waid-cattle-clean-v1/manifest.json",
+  "initial_weights": "models/yolo11n.pt",
+  "initial_weights_sha256": "0ebbc80d4a7680d14987a577cd21342b65ecfd94632bd9a8da63ae6417644ee1",
+  "best_weights": "runs/waid/cattle-pilot-yolo11n-v2/weights/best.pt",
+  "output_weights": "models/waid-cattle-yolo11n-v2.pt",
+  "output_weights_sha256": "1d147372b36ef8bd568ce8852366b1b71df5e52ba70f98dd5c234714a7d74a01",
+  "run_dir": "runs/waid/cattle-pilot-yolo11n-v2",
+  "device": "0",
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "torch": "2.9.1+cu126",
+  "ultralytics": "8.4.198",
+  "parameters": {
+    "epochs": 50,
+    "imgsz": 640,
+    "batch": 8,
+    "patience": 10,
+    "seed": 42,
+    "workers": 0
+  }
+}

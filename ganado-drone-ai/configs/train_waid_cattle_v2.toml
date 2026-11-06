@@ -1,0 +1,13 @@
+# Second reproducibility run for the local WAID cattle pilot.
+dataset = "data/processed/waid-cattle-clean-v1/dataset.yaml"
+initial_weights = "models/yolo11n.pt"
+output_weights = "models/waid-cattle-yolo11n-v2.pt"
+run_project = "runs/waid"
+run_name = "cattle-pilot-yolo11n-v2"
+epochs = 50
+imgsz = 640
+batch = 8
+patience = 10
+seed = 42
+workers = 0
+device = "auto"
