@@ -1,0 +1,41 @@
+{
+  "created_at_utc": "2026-11-06T06:23:38.851077+00:00",
+  "checkpoint": "models/waid-cattle-yolo11n-1500.pt",
+  "checkpoint_sha256": "e15d103f70668bcbe7f46ac883441790e4e93db7c301e2f003011e8e41a0d718",
+  "dataset": "data/processed/waid-cattle-1500-v1/dataset.yaml",
+  "dataset_manifest": "data/processed/waid-cattle-1500-v1/manifest.json",
+  "device": "0",
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "torch": "2.9.1+cu126",
+  "ultralytics": "8.4.198",
+  "imgsz": 640,
+  "confidence_threshold_selection": {
+    "split": "valid",
+    "mae_per_threshold": {
+      "0.1": 1.3259438863872532,
+      "0.15": 0.8978178039487357,
+      "0.2": 0.654312435053689,
+      "0.25": 0.4797367509525459,
+      "0.3": 0.36820228611014894,
+      "0.35": 0.31624523727052306,
+      "0.4": 0.3200554208520956,
+      "0.45": 0.35781087634222375,
+      "0.5": 0.41461724974021474
+    },
+    "selected_threshold": 0.35
+  },
+  "test": {
+    "split": "test",
+    "images": 1434,
+    "count_mae_at_validation_threshold": 0.31450488145048816,
+    "detector_metrics": {
+      "metrics/precision(B)": 0.9551944115087533,
+      "metrics/recall(B)": 0.9233291648259735,
+      "metrics/mAP50(B)": 0.9681372027687802,
+      "metrics/mAP50-95(B)": 0.6273920242837904,
+      "fitness": 0.6273920242837904
+    },
+    "ultralytics_save_dir": "reports/generated/waid-1500/ultralytics/waid-test"
+  },
+  "interpretation": "Conteo por imagen; no representa individuos únicos entre fotos superpuestas."
+}

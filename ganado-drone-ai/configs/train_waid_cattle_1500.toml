@@ -1,0 +1,13 @@
+# Experimento incremental con aproximadamente 1.500 imagenes de entrenamiento.
+dataset = "data/processed/waid-cattle-1500-v1/dataset.yaml"
+initial_weights = "models/yolo11n.pt"
+output_weights = "models/waid-cattle-yolo11n-1500.pt"
+run_project = "runs/waid"
+run_name = "cattle-pilot-yolo11n-1500"
+epochs = 50
+imgsz = 640
+batch = 8
+patience = 10
+seed = 42
+workers = 0
+device = "auto"
