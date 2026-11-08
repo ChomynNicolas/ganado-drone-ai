@@ -1,0 +1,14 @@
+# Experimento incremental WAID: 5.000 imágenes de entrenamiento.
+# Incluye 3.266 positivas y 1.734 negativas para reforzar la calibración de falsos positivos.
+dataset = "data/processed/waid-cattle-5000-v1/dataset.yaml"
+initial_weights = "models/yolo11n.pt"
+output_weights = "models/waid-cattle-yolo11n-5000.pt"
+run_project = "runs/waid"
+run_name = "cattle-pilot-yolo11n-5000"
+epochs = 50
+imgsz = 640
+batch = 8
+patience = 10
+seed = 42
+workers = 0
+device = "auto"

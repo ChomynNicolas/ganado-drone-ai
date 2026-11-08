@@ -1,0 +1,120 @@
+{
+  "created_at_utc": "2026-11-06T19:12:16.946621+00:00",
+  "checkpoint": "models/waid-cattle-yolo11n-5000.pt",
+  "checkpoint_sha256": "c9abe42debc127b0ac222fd57a2c58cdf5d4e3ffbba85d4182c1fdb2aefbf7db",
+  "dataset": "data/processed/waid-cattle-5000-v1/dataset.yaml",
+  "dataset_manifest": "data/processed/waid-cattle-5000-v1/manifest.json",
+  "device": "0",
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "torch": "2.9.1+cu126",
+  "ultralytics": "8.4.198",
+  "imgsz": 640,
+  "confidence_threshold_selection": {
+    "split": "valid",
+    "metrics_per_threshold": {
+      "0.1": {
+        "count_mae": 1.0505715275372358,
+        "positive_image_recall": 1.0,
+        "negative_image_false_positive_rate": 0.01023541453428864,
+        "false_detections_per_negative_image": 0.016376663254861822,
+        "positive_images": 933,
+        "negative_images": 1954
+      },
+      "0.15": {
+        "count_mae": 0.6886040872878421,
+        "positive_image_recall": 1.0,
+        "negative_image_false_positive_rate": 0.00511770726714432,
+        "false_detections_per_negative_image": 0.007164790174002047,
+        "positive_images": 933,
+        "negative_images": 1954
+      },
+      "0.2": {
+        "count_mae": 0.4870107377900935,
+        "positive_image_recall": 1.0,
+        "negative_image_false_positive_rate": 0.0035823950870010235,
+        "false_detections_per_negative_image": 0.0035823950870010235,
+        "positive_images": 933,
+        "negative_images": 1954
+      },
+      "0.25": {
+        "count_mae": 0.36335296155178387,
+        "positive_image_recall": 1.0,
+        "negative_image_false_positive_rate": 0.00255885363357216,
+        "false_detections_per_negative_image": 0.00255885363357216,
+        "positive_images": 933,
+        "negative_images": 1954
+      },
+      "0.3": {
+        "count_mae": 0.2864565292691375,
+        "positive_image_recall": 1.0,
+        "negative_image_false_positive_rate": 0.0020470829068577278,
+        "false_detections_per_negative_image": 0.0020470829068577278,
+        "positive_images": 933,
+        "negative_images": 1954
+      },
+      "0.35": {
+        "count_mae": 0.2528576376861794,
+        "positive_image_recall": 1.0,
+        "negative_image_false_positive_rate": 0.0020470829068577278,
+        "false_detections_per_negative_image": 0.0020470829068577278,
+        "positive_images": 933,
+        "negative_images": 1954
+      },
+      "0.4": {
+        "count_mae": 0.24766193280221682,
+        "positive_image_recall": 1.0,
+        "negative_image_false_positive_rate": 0.0015353121801432957,
+        "false_detections_per_negative_image": 0.0015353121801432957,
+        "positive_images": 933,
+        "negative_images": 1954
+      },
+      "0.45": {
+        "count_mae": 0.28368548666435744,
+        "positive_image_recall": 1.0,
+        "negative_image_false_positive_rate": 0.0010235414534288639,
+        "false_detections_per_negative_image": 0.0010235414534288639,
+        "positive_images": 933,
+        "negative_images": 1954
+      },
+      "0.5": {
+        "count_mae": 0.3498441288534811,
+        "positive_image_recall": 0.9989281886387996,
+        "negative_image_false_positive_rate": 0.0010235414534288639,
+        "false_detections_per_negative_image": 0.0010235414534288639,
+        "positive_images": 933,
+        "negative_images": 1954
+      }
+    },
+    "mae_per_threshold": {
+      "0.1": 1.0505715275372358,
+      "0.15": 0.6886040872878421,
+      "0.2": 0.4870107377900935,
+      "0.25": 0.36335296155178387,
+      "0.3": 0.2864565292691375,
+      "0.35": 0.2528576376861794,
+      "0.4": 0.24766193280221682,
+      "0.45": 0.28368548666435744,
+      "0.5": 0.3498441288534811
+    },
+    "selected_threshold": 0.4
+  },
+  "test": {
+    "split": "test",
+    "images": 1434,
+    "count_mae_at_validation_threshold": 0.20571827057182707,
+    "positive_image_recall_at_validation_threshold": 0.9978540772532188,
+    "negative_image_false_positive_rate_at_validation_threshold": 0.0010330578512396695,
+    "false_detections_per_negative_image_at_validation_threshold": 0.004132231404958678,
+    "positive_images": 466,
+    "negative_images": 968,
+    "detector_metrics": {
+      "metrics/precision(B)": 0.9631103387971758,
+      "metrics/recall(B)": 0.9409688803336541,
+      "metrics/mAP50(B)": 0.9759862306809516,
+      "metrics/mAP50-95(B)": 0.6448008026810108,
+      "fitness": 0.6448008026810108
+    },
+    "ultralytics_save_dir": "reports/generated/waid-5000/ultralytics/waid-test"
+  },
+  "interpretation": "Conteo por imagen; no representa individuos únicos entre fotos superpuestas."
+}
