@@ -5,7 +5,15 @@ from pathlib import Path
 
 import pytest
 
-from scripts.evaluate_yolo import label_count, mean_absolute_error, read_dataset_root
+from scripts.evaluate_yolo import (
+    _match_boxes,
+    label_count,
+    labels_dir_for_images,
+    mean_absolute_error,
+    read_dataset_root,
+    read_dataset_split,
+    select_threshold,
+)
 from scripts.train_yolo import select_device
 
 
@@ -44,3 +52,44 @@ def test_read_dataset_root_reads_generated_yaml_path(tmp_path: Path) -> None:
     dataset_yaml.write_text(f"path: {json.dumps(root.as_posix())}\ntrain: images/train\n")
 
     assert read_dataset_root(dataset_yaml) == root
+
+
+def test_read_dataset_split_resolves_absolute_mixed_validation(tmp_path: Path) -> None:
+    root = tmp_path / "mixed"
+    valid = tmp_path / "waid" / "images" / "valid"
+    dataset_yaml = root / "dataset.yaml"
+    dataset_yaml.parent.mkdir(parents=True)
+    dataset_yaml.write_text(
+        f"path: {json.dumps(root.as_posix())}\nval: {json.dumps(valid.as_posix())}\n"
+    )
+
+    assert read_dataset_split(dataset_yaml, root, "val") == valid
+    assert labels_dir_for_images(valid) == tmp_path / "waid" / "labels" / "valid"
+
+
+def test_box_match_counts_true_false_and_missed_detections() -> None:
+    targets = [[0, 0, 10, 10], [20, 20, 30, 30]]
+    predictions = [
+        {"bbox_xyxy": [0, 0, 10, 10], "confidence": 0.9},
+        {"bbox_xyxy": [40, 40, 50, 50], "confidence": 0.8},
+    ]
+
+    assert _match_boxes(targets, predictions, threshold=0.4) == (1, 1, 1)
+
+
+def test_select_threshold_maximizes_recall_subject_to_precision_constraint() -> None:
+    metrics = {
+        "0.2": {"box_precision_iou_0_50": 0.89, "box_recall_iou_0_50": 0.99, "count_mae": 1.0},
+        "0.3": {"box_precision_iou_0_50": 0.92, "box_recall_iou_0_50": 0.80, "count_mae": 1.5},
+        "0.4": {"box_precision_iou_0_50": 0.95, "box_recall_iou_0_50": 0.80, "count_mae": 1.0},
+    }
+
+    assert select_threshold(metrics, [0.2, 0.3, 0.4]) == 0.4
+
+
+def test_select_threshold_fails_if_precision_constraint_is_not_met() -> None:
+    metrics = {
+        "0.2": {"box_precision_iou_0_50": 0.89, "box_recall_iou_0_50": 0.99, "count_mae": 1.0}
+    }
+    with pytest.raises(ValueError, match="Ningún umbral alcanza precisión"):
+        select_threshold(metrics, [0.2])

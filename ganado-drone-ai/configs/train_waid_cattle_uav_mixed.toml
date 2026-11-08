@@ -1,0 +1,13 @@
+# Ajuste local WAID + fotos UAV con cajas; datos y checkpoint derivados no se publican.
+dataset = "data/processed/waid-cattle-uav-mixed-v1/dataset.yaml"
+initial_weights = "models/waid-cattle-yolo11n-5000.pt"
+output_weights = "models/waid-cattle-yolo11n-uav-mixed.pt"
+run_project = "runs/waid"
+run_name = "cattle-yolo11n-uav-mixed-v1"
+epochs = 50
+imgsz = 640
+batch = 8
+patience = 10
+seed = 42
+workers = 0
+device = "auto"
