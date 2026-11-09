@@ -1,0 +1,37 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    environment:
+      MODEL_WEIGHTS: /models/${MODEL_CHECKPOINT:-waid-cattle-yolo11n-uav-mixed.pt}
+      MODEL_DEVICE: cpu
+      MODEL_CONFIDENCE: ${MODEL_CONFIDENCE:-0.4}
+    volumes:
+      - ./models/${MODEL_CHECKPOINT:-waid-cattle-yolo11n-uav-mixed.pt}:/models/${MODEL_CHECKPOINT:-waid-cattle-yolo11n-uav-mixed.pt}:ro
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import json,urllib.request; d=json.load(urllib.request.urlopen('http://127.0.0.1:8000/health')); raise SystemExit(0 if d.get('model_loaded') else 1)"
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
+  ui:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ui
+    environment:
+      API_URL: http://api:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped

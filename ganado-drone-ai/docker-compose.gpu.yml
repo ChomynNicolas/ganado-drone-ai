@@ -1,0 +1,8 @@
+services:
+  api:
+    build:
+      args:
+        TORCH_INDEX_URL: https://download.pytorch.org/whl/cu126
+    environment:
+      MODEL_DEVICE: cuda
+    gpus: all

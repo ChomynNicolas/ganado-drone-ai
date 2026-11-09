@@ -1,0 +1,23 @@
+FROM python:3.11-slim
+
+ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cpu
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    MODEL_WEIGHTS=/models/waid-cattle-yolo11n.pt \
+    MODEL_DEVICE=cpu \
+    YOLO_CONFIG_DIR=/tmp/ultralytics
+
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY api/requirements.txt /app/requirements-api.txt
+COPY requirements-ml.txt /app/requirements-ml.txt
+RUN python -m pip install --upgrade pip \
+    && python -m pip install --index-url ${TORCH_INDEX_URL} torch==2.9.1 torchvision==0.24.1 \
+    && python -m pip install -r /app/requirements-api.txt -r /app/requirements-ml.txt
+
+COPY api/app /app/api/app
+EXPOSE 8000
+CMD ["python", "-m", "uvicorn", "api.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
